@@ -25,7 +25,7 @@ export default async function DashboardLayout({
         <div className="p-4 bg-brand-yellow flex justify-center items-center">
           <div className="relative w-48 h-16">
             <Image
-              src="/logo.tlc.png"
+              src="/logo_car_tcl.png"
               alt="Tecnicentro Los Carros Logo"
               fill
               className="object-contain drop-shadow-md"
