@@ -71,7 +71,7 @@ export default function LoginForm() {
             {...register("username")}
             type="text"
             className="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 text-gray-900 p-2.5 outline-none border"
-            placeholder="soraida"
+            placeholder="username"
           />
         </div>
         {errors.username && (

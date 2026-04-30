@@ -12,9 +12,11 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  
-  --color-brand-yellow: #fde047; /* Bright yellow */
-  --color-brand-blue: #1e3a8a;   /* Deep blue */
+
+  --color-brand-yellow: #fde047;
+  /* Bright yellow */
+  --color-brand-blue: #1e3a8a;
+  /* Deep blue */
   --color-brand-black: #020617;
   --color-brand-white: #ffffff;
 }
