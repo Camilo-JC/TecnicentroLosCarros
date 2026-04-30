@@ -1,303 +1,220 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Car, Lock, User } from "lucide-react";
+import LoginForm from "./LoginForm";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 
-const loginSchema = z.object({
-  username: z.string().min(1, "El usuario es obligatorio"),
-  password: z.string().min(1, "La contraseña es obligatoria"),
-});
+export default function LoginPage() {
+  // Estado para evitar errores de hidratación
+  const [mounted, setMounted] = useState(false);
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+  useEffect(() => {
+    setMounted(true);
+    setWindowSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }, []);
 
-export default function LoginForm() {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [shake, setShake] = useState(false);
+  // No renderizar las partículas hasta que esté montado en el cliente
+  const particles = mounted ? [...Array(8)].map((_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    delay: Math.random() * 2,
+    duration: 3 + Math.random() * 2,
+  })) : [];
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await signIn("credentials", {
-        redirect: false,
-        username: data.username.toLowerCase(),
-        password: data.password,
-      });
-
-      if (result?.error) {
-        setError("Usuario o contraseña incorrectos");
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
-      } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } catch (error) {
-      setError("Ocurrió un error inesperado");
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Variants con tipos corregidos
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 100,
-        damping: 12,
-      },
-    },
-  };
-
-  const errorVariants = {
-    hidden: { opacity: 0, y: -10, height: 0 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      height: "auto",
-      transition: {
-        type: "spring" as const,
-        stiffness: 500,
-        damping: 30,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      height: 0,
-      transition: { duration: 0.2 },
-    },
-  };
-
-  const inputVariants = {
-    focus: { 
-      scale: 1.01, 
-      transition: { 
-        type: "spring" as const, 
-        stiffness: 300 
-      } 
-    },
-    blur: { scale: 1 },
-  };
-
-  const buttonVariants = {
-    idle: { scale: 1 },
-    hover: {
-      scale: 1.02,
-      transition: {
-        type: "spring" as const,
-        stiffness: 400,
-        damping: 10,
-      },
-    },
-    tap: { scale: 0.98 },
-    loading: {
-      scale: 0.98,
-      opacity: 0.8,
-    },
-  };
+  if (!mounted) {
+    // Renderizado inicial en servidor (sin animaciones complejas)
+    return (
+      <div
+        className="relative min-h-screen flex items-center justify-center p-4"
+        style={{
+          backgroundImage: "url('/fondo%20tlc.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="absolute inset-0 bg-brand-blue/70" />
+        <div className="relative z-10 bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md flex flex-col">
+          <div className="bg-brand-yellow p-6 text-center flex flex-col items-center">
+            <div className="relative w-60 h-30 mb-2">
+              <Image
+                src="/logo.tlc.png"
+                alt="Tecnicentro Los Carros Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+          </div>
+          <div className="p-8">
+            <h3 className="text-xl font-bold text-brand-blue mb-6 text-center">
+              Iniciar Sesión
+            </h3>
+            <LoginForm />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <motion.div
-      animate={shake ? { x: [-5, 5, -3, 3, 0] } : {}}
-      transition={{ duration: 0.3 }}
-    >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <AnimatePresence mode="wait">
-          {error && (
-            <motion.div
-              key="error"
-              variants={errorVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200"
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+    <AnimatePresence mode="wait">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden"
+        style={{
+          backgroundImage: "url('/fondo%20tlc.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Overlay azul semitransparente con animación */}
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.7 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="absolute inset-0 bg-brand-blue/70"
+        />
+
+        {/* Fondo dinámico con partículas - solo en cliente */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0 overflow-hidden pointer-events-none"
         >
-          {/* Campo Usuario */}
-          <motion.div variants={itemVariants}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Usuario
-            </label>
+          {particles.map((particle) => (
             <motion.div
-              className="relative"
-              variants={inputVariants}
-              initial="blur"
-              whileFocus="focus"
-            >
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <motion.div
-                  animate={errors.username ? { x: [-2, 2, -2, 2, 0] } : {}}
-                  transition={{ duration: 0.3 }}
-                >
-                  <User className="h-5 w-5 text-gray-400" />
-                </motion.div>
-              </div>
-              <input
-                {...register("username")}
-                type="text"
-                className="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 text-gray-900 p-2.5 outline-none border transition-all duration-200"
-                placeholder="username"
-              />
-            </motion.div>
-            <AnimatePresence>
-              {errors.username && (
-                <motion.p
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  className="mt-1 text-sm text-red-600"
-                >
-                  {errors.username.message}
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Campo Contraseña */}
-          <motion.div variants={itemVariants}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña
-            </label>
-            <motion.div
-              className="relative"
-              variants={inputVariants}
-              initial="blur"
-              whileFocus="focus"
-            >
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <motion.div
-                  animate={errors.password ? { rotate: [0, -5, 5, -5, 0] } : {}}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </motion.div>
-              </div>
-              <input
-                {...register("password")}
-                type="password"
-                className="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 text-gray-900 p-2.5 outline-none border transition-all duration-200"
-                placeholder="••••••"
-              />
-            </motion.div>
-            <AnimatePresence>
-              {errors.password && (
-                <motion.p
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  className="mt-1 text-sm text-red-600"
-                >
-                  {errors.password.message}
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Botón de Ingreso */}
-          <motion.div variants={itemVariants} className="mt-6">
-            <motion.button
-              type="submit"
-              disabled={isLoading}
-              variants={buttonVariants}
-              initial="idle"
-              whileHover={!isLoading ? "hover" : "idle"}
-              whileTap={!isLoading ? "tap" : "idle"}
-              animate={isLoading ? "loading" : "idle"}
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-brand-black bg-brand-yellow hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-yellow transition-colors disabled:opacity-50 relative overflow-hidden group"
-            >
-              {/* Efecto de brillo en hover */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
-                initial={false}
-              />
-              
-              {isLoading ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex items-center"
-                >
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2 text-brand-black"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Ingresando...
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="flex items-center"
-                >
-                  <Car className="w-5 h-5 mr-2 transition-transform group-hover:rotate-12 duration-300" />
-                  Ingresar al Sistema
-                </motion.div>
-              )}
-            </motion.button>
-          </motion.div>
+              key={particle.id}
+              className="absolute w-2 h-2 bg-white/20 rounded-full"
+              initial={{
+                x: 0,
+                y: 0,
+              }}
+              animate={{
+                y: [0, -100, -200],
+                opacity: [0.2, 0.5, 0],
+              }}
+              transition={{
+                duration: particle.duration,
+                repeat: Infinity,
+                delay: particle.delay,
+              }}
+              style={{
+                left: particle.left,
+                top: particle.top,
+              }}
+            />
+          ))}
         </motion.div>
-      </form>
-    </motion.div>
+
+        {/* Card principal */}
+        <motion.div
+          initial={{ opacity: 0, y: 50, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 100,
+            damping: 20,
+            delay: 0.3,
+            duration: 0.6,
+          }}
+          className="relative z-10 bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md flex flex-col"
+        >
+          {/* Header amarillo animado */}
+          <motion.div
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 120,
+              damping: 15,
+              delay: 0.4,
+            }}
+            className="bg-brand-yellow p-6 text-center flex flex-col items-center relative overflow-hidden"
+          >
+            {/* Efecto de brillo en el header */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              initial={{ x: "-100%" }}
+              animate={{ x: "200%" }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                repeatDelay: 3,
+              }}
+            />
+            
+            {/* Logo animado */}
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 200,
+                damping: 15,
+                delay: 0.5,
+              }}
+              className="relative w-60 h-30 mb-2"
+            >
+              <Image
+                src="/logo.tlc.png"
+                alt="Tecnicentro Los Carros Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </motion.div>
+
+            {/* Línea decorativa animada */}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "80px" }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="h-1 bg-white/50 rounded-full mx-auto mt-2"
+            />
+          </motion.div>
+
+          {/* Contenido del formulario */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="p-8"
+          >
+            <motion.h3
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7, duration: 0.4 }}
+              className="text-xl font-bold text-brand-blue mb-6 text-center"
+            >
+              Iniciar Sesión
+            </motion.h3>
+            
+            <LoginForm />
+          </motion.div>
+
+          {/* Efecto de borde animado al hacer hover (opcional) */}
+          <motion.div
+            className="absolute inset-0 rounded-2xl pointer-events-none"
+            initial={{ boxShadow: "0 0 0 0px rgba(0,0,0,0)" }}
+            whileHover={{
+              boxShadow: "0 0 0 2px rgba(255,193,7,0.3), 0 20px 40px rgba(0,0,0,0.2)",
+            }}
+            transition={{ duration: 0.3 }}
+          />
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
