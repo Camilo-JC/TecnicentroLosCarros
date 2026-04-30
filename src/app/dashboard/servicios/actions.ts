@@ -62,7 +62,10 @@ export async function searchVehiclesByPlate(query: string) {
   if (!query) return [];
   return await prisma.vehicle.findMany({
     where: {
-      plate: { contains: query, mode: 'insensitive' }
+      OR: [
+        { plate: { contains: query, mode: 'insensitive' } },
+        { client: { documentId: { contains: query, mode: 'insensitive' } } }
+      ]
     },
     include: {
       client: true

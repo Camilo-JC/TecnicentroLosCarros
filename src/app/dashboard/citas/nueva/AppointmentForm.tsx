@@ -18,6 +18,9 @@ export default function AppointmentForm() {
   const [notifyEmail, setNotifyEmail] = useState(true);
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(false);
 
+  // Get today's date in YYYY-MM-DD format
+  const todayDate = new Date().toISOString().split('T')[0];
+
   const handleSearchVehicle = async (query: string) => {
     if (!query) {
       setVehicles([]);
@@ -136,13 +139,13 @@ export default function AppointmentForm() {
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
                 <CalendarDays className="w-4 h-4 text-brand-blue" /> Fecha
               </label>
-              <input required name="scheduledDate" type="date" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" />
+              <input required name="scheduledDate" type="date" min={todayDate} className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-brand-blue" /> Hora
+                <Clock className="w-4 h-4 text-brand-blue" /> Hora (8:00 AM - 5:00 PM)
               </label>
-              <input required name="scheduledTime" type="time" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" />
+              <input required name="scheduledTime" type="time" min="08:00" max="17:00" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" />
             </div>
           </div>
 

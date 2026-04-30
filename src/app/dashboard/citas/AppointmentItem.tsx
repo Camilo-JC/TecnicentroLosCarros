@@ -13,6 +13,8 @@ export default function AppointmentItem({ appointment, isHistory = false }: { ap
   const [newDate, setNewDate] = useState(new Date(appointment.scheduledDate).toISOString().split('T')[0]);
   const [newTime, setNewTime] = useState(appointment.scheduledTime);
 
+  const todayDate = new Date().toISOString().split('T')[0];
+
   const handleStatusChange = (status: string) => {
     startTransition(() => {
       updateAppointmentStatus(appointment.id, status);
@@ -92,6 +94,7 @@ export default function AppointmentItem({ appointment, isHistory = false }: { ap
             </label>
             <input 
               type="date" 
+              min={todayDate}
               value={newDate}
               onChange={(e) => setNewDate(e.target.value)}
               className="rounded border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-white p-1.5 text-sm outline-none border" 
@@ -103,6 +106,8 @@ export default function AppointmentItem({ appointment, isHistory = false }: { ap
             </label>
             <input 
               type="time" 
+              min="08:00"
+              max="17:00"
               value={newTime}
               onChange={(e) => setNewTime(e.target.value)}
               className="rounded border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-white p-1.5 text-sm outline-none border" 

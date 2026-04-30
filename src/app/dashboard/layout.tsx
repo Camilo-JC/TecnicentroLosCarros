@@ -19,7 +19,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen flex">
       {/* Sidebar */}
       <aside className="w-64 bg-brand-blue text-white flex flex-col fixed h-full shadow-xl">
         <div className="p-4 bg-brand-yellow flex justify-center items-center">
@@ -66,10 +66,23 @@ export default async function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 p-8">
-        <PageTransition>
-          {children}
-        </PageTransition>
+      <main
+        className="relative flex-1 ml-64 p-8"
+        style={{
+          backgroundImage: "url('/fondo%20tlc.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Overlay claro */}
+        <div className="absolute inset-0 bg-white/85" />
+        <div className="relative z-10">
+          <PageTransition>
+            {children}
+          </PageTransition>
+        </div>
       </main>
     </div>
   );
