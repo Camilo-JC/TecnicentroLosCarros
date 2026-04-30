@@ -19,15 +19,15 @@
   --color-brand-white: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
+}
+
+/* Forzar texto oscuro en todos los inputs, selects y textareas */
+input,
+select,
+textarea {
+  color: #0f172a !important;
 }
