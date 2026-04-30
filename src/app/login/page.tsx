@@ -19,7 +19,7 @@ export default function LoginPage() {
         <div className="bg-brand-yellow p-6 text-center flex flex-col items-center">
           <div className="relative w-60 h-30 mb-2">
             <Image
-              src="/logo.tcl.png"
+              src="/logo.tlc.png"
               alt="Tecnicentro Los Carros Logo"
               fill
               className="object-contain"
