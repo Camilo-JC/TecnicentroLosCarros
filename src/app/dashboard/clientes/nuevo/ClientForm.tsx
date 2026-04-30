@@ -74,8 +74,8 @@ export default function ClientForm() {
             <input required name="brand" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="Chevrolet" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Modelo / Año *</label>
-            <input required name="modelYear" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="Spark 2015" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Año *</label>
+            <input required name="modelYear" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="2020" />
           </div>
         </div>
       </div>

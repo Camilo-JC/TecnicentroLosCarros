@@ -75,11 +75,11 @@ export async function createAppointment(formData: FormData) {
 
     let whatsappUrl = null;
     if (notifyWhatsapp && appointment.client.phone) {
-      // Formato básico para el enlace de WhatsApp
+      // Formato básico para el enlace de WhatsApp al CLIENTE
       let phone = appointment.client.phone.replace(/\D/g, '');
       if (phone.length === 10) phone = `57${phone}`; // Asumimos prefijo +57 Colombia si tiene 10 dígitos (celular normal)
       
-      const message = `Hola ${appointment.client.firstName}, te confirmamos tu cita en Tecnicentro Los Carros para el vehículo ${appointment.vehicle.plate} el día ${fechaFormateada} a las ${timeStr}. ¡Te esperamos!`;
+      const message = `Hola, buen día. Su cita ha sido agendada para el día ${fechaFormateada} a las ${timeStr}.\nAgradecemos confirmar su disponibilidad.\nTecnicentro Los Carros, la mejor decisión para su carro y usted.`;
       whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     }
 
@@ -96,4 +96,20 @@ export async function updateAppointmentStatus(id: string, status: string) {
     data: { status }
   });
   revalidatePath("/dashboard/citas");
+}
+
+export async function rescheduleAppointment(id: string, dateStr: string, timeStr: string) {
+  const scheduledDate = new Date(dateStr);
+  scheduledDate.setHours(12, 0, 0, 0);
+
+  await prisma.appointment.update({
+    where: { id },
+    data: { 
+      scheduledDate,
+      scheduledTime: timeStr
+    }
+  });
+  
+  revalidatePath("/dashboard/citas");
+  return { success: true };
 }
