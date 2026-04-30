@@ -1,8 +1,5 @@
-"use client";
-
 import LoginForm from "./LoginForm";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 export default function LoginPage() {
   return (
@@ -15,14 +12,10 @@ export default function LoginPage() {
         backgroundRepeat: "no-repeat",
       }}
     >
+      {/* Overlay azul semitransparente */}
       <div className="absolute inset-0 bg-brand-blue/70" />
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative z-10 bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md flex flex-col"
-      >
+
+      <div className="relative z-10 bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md flex flex-col">
         <div className="bg-brand-yellow p-6 text-center flex flex-col items-center">
           <div className="relative w-60 h-30 mb-2">
             <Image
@@ -40,7 +33,7 @@ export default function LoginPage() {
           </h3>
           <LoginForm />
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

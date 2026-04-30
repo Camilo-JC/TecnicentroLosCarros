@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Car, Lock, User } from "lucide-react";
-import { motion } from "framer-motion";
 
 const loginSchema = z.object({
   username: z.string().min(1, "El usuario es obligatorio"),
@@ -55,13 +54,9 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200"
-        >
+        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium">
           {error}
-        </motion.div>
+        </div>
       )}
 
       <div>
@@ -104,11 +99,9 @@ export default function LoginForm() {
         )}
       </div>
 
-      <motion.button
+      <button
         type="submit"
         disabled={isLoading}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
         className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-brand-black bg-brand-yellow hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-yellow transition-colors disabled:opacity-50 mt-6"
       >
         {isLoading ? (
@@ -119,7 +112,7 @@ export default function LoginForm() {
             Ingresar al Sistema
           </>
         )}
-      </motion.button>
+      </button>
     </form>
   );
 }
