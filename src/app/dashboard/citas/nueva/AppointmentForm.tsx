@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useState } from "react";
+import { useTransition, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createAppointment } from "../actions";
 import { searchVehiclesByPlate } from "../../servicios/actions";
@@ -18,12 +18,22 @@ export default function AppointmentForm() {
   const [notifyEmail, setNotifyEmail] = useState(true);
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(false);
 
-  const handleSearchVehicle = async () => {
-    if (!plateQuery) return;
-    const results = await searchVehiclesByPlate(plateQuery);
+  const handleSearchVehicle = async (query: string) => {
+    if (!query) {
+      setVehicles([]);
+      return;
+    }
+    const results = await searchVehiclesByPlate(query);
     setVehicles(results);
     setSelectedVehicle(null);
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearchVehicle(plateQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [plateQuery]);
 
   const handleSubmit = async (formData: FormData) => {
     setError(null);
@@ -65,18 +75,10 @@ export default function AppointmentForm() {
                 type="text"
                 value={plateQuery}
                 onChange={(e) => setPlateQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearchVehicle()}
                 className="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-white p-2.5 outline-none border uppercase"
-                placeholder="ABC-123"
+                placeholder="ABC-123 o Cédula..."
               />
             </div>
-            <button
-              type="button"
-              onClick={handleSearchVehicle}
-              className="bg-brand-blue text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-800 transition-colors"
-            >
-              Buscar
-            </button>
           </div>
 
           {vehicles.length > 0 && (
