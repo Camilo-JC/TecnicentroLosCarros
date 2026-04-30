@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Car, LogOut, Users, Wrench, CalendarDays } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 
@@ -19,13 +20,17 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-brand-blue text-white flex flex-col fixed h-full">
-        <div className="p-4 bg-brand-yellow text-brand-black">
-          <h1 className="font-black text-xl tracking-tighter uppercase leading-tight">
-            Tecnicentro
-            <br />
-            Los Carros
-          </h1>
+      <aside className="w-64 bg-brand-blue text-white flex flex-col fixed h-full shadow-xl">
+        <div className="p-4 bg-brand-yellow flex justify-center items-center">
+          <div className="relative w-48 h-16">
+            <Image
+              src="/logo.tlc.png"
+              alt="Tecnicentro Los Carros Logo"
+              fill
+              className="object-contain drop-shadow-md"
+              priority
+            />
+          </div>
         </div>
         
         <div className="p-4 border-b border-blue-800">
