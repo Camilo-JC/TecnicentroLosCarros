@@ -1,159 +1,125 @@
-
-export const dynamic = 'force-dynamic';
-
-
 "use client";
 
-import LoginForm from "./LoginForm";
-import Image from "next/image";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Car, Lock, User } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 
-export default function LoginPage() {
-  const [isClient, setIsClient] = useState(false);
+const loginSchema = z.object({
+  username: z.string().min(1, "El usuario es obligatorio"),
+  password: z.string().min(1, "La contraseña es obligatoria"),
+});
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+type LoginFormValues = z.infer<typeof loginSchema>;
 
-  // Versión base sin animaciones complejas para SSR
-  const baseContent = (
-    <div
-      className="relative min-h-screen flex items-center justify-center p-4"
-      style={{
-        backgroundImage: "url('/fondo%20tlc.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="absolute inset-0 bg-brand-blue/70" />
-      <div className="relative z-10 bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md flex flex-col">
-        <div className="bg-brand-yellow p-6 text-center flex flex-col items-center">
-          <div className="relative w-60 h-30 mb-2">
-            <Image
-              src="/logo.tlc.png"
-              alt="Tecnicentro Los Carros Logo"
-              fill
-              className="object-contain"
-              priority
-            />
+export default function LoginForm() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        username: data.username.toLowerCase(),
+        password: data.password,
+      });
+
+      if (result?.error) {
+        setError("Usuario o contraseña incorrectos");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (error) {
+      setError("Ocurrió un error inesperado");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200"
+        >
+          {error}
+        </motion.div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Usuario
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <User className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="h-1 w-20 bg-white/50 rounded-full mx-auto mt-2" />
+          <input
+            {...register("username")}
+            type="text"
+            className="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 text-gray-900 p-2.5 outline-none border"
+            placeholder="username"
+          />
         </div>
-        <div className="p-8">
-          <h3 className="text-xl font-bold text-brand-blue mb-6 text-center">
-            Iniciar Sesión
-          </h3>
-          <LoginForm />
-        </div>
+        {errors.username && (
+          <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
+        )}
       </div>
-    </div>
-  );
 
-  // Versión con animaciones solo en el cliente
-  const animatedContent = (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden"
-      style={{
-        backgroundImage: "url('/fondo%20tlc.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.7 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-        className="absolute inset-0 bg-brand-blue/70"
-      />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Contraseña
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Lock className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            {...register("password")}
+            type="password"
+            className="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 text-gray-900 p-2.5 outline-none border"
+            placeholder="••••••"
+          />
+        </div>
+        {errors.password && (
+          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+        )}
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 50, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{
-          type: "spring",
-          stiffness: 100,
-          damping: 20,
-          delay: 0.3,
-        }}
-        className="relative z-10 bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md flex flex-col"
+      <motion.button
+        type="submit"
+        disabled={isLoading}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-brand-black bg-brand-yellow hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-yellow transition-colors disabled:opacity-50 mt-6"
       >
-        <motion.div
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 120,
-            damping: 15,
-            delay: 0.4,
-          }}
-          className="bg-brand-yellow p-6 text-center flex flex-col items-center relative overflow-hidden"
-        >
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            initial={{ x: "-100%" }}
-            animate={{ x: "200%" }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              repeatDelay: 3,
-            }}
-          />
-          
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 15,
-              delay: 0.5,
-            }}
-            className="relative w-60 h-30 mb-2"
-          >
-            <Image
-              src="/logo.tlc.png"
-              alt="Tecnicentro Los Carros Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: "80px" }}
-            transition={{ delay: 0.7, duration: 0.5 }}
-            className="h-1 bg-white/50 rounded-full mx-auto mt-2"
-          />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="p-8"
-        >
-          <motion.h3
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.7, duration: 0.4 }}
-            className="text-xl font-bold text-brand-blue mb-6 text-center"
-          >
-            Iniciar Sesión
-          </motion.h3>
-          
-          <LoginForm />
-        </motion.div>
-      </motion.div>
-    </motion.div>
+        {isLoading ? (
+          "Ingresando..."
+        ) : (
+          <>
+            <Car className="w-5 h-5 mr-2" />
+            Ingresar al Sistema
+          </>
+        )}
+      </motion.button>
+    </form>
   );
-
-  // Renderiza versión base en servidor, versión animada en cliente
-  return isClient ? animatedContent : baseContent;
 }
