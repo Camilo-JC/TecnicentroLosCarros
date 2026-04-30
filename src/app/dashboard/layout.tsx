@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Car, LogOut, Users, Wrench, CalendarDays } from "lucide-react";
 import LogoutButton from "./LogoutButton";
+import PageTransition from "@/components/PageTransition";
 
 export default async function DashboardLayout({
   children,
@@ -66,7 +67,9 @@ export default async function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 ml-64 p-8">
-        {children}
+        <PageTransition>
+          {children}
+        </PageTransition>
       </main>
     </div>
   );

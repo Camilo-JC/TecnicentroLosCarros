@@ -24,6 +24,8 @@ export async function createAppointment(formData: FormData) {
   const clientId = formData.get("clientId") as string;
   const dateStr = formData.get("scheduledDate") as string;
   const timeStr = formData.get("scheduledTime") as string;
+  const notifyEmail = formData.get("notifyEmail") === "true";
+  const notifyWhatsapp = formData.get("notifyWhatsapp") === "true";
 
   if (!vehicleId || !clientId || !dateStr || !timeStr) {
     return { error: "Faltan campos obligatorios." };
@@ -47,8 +49,9 @@ export async function createAppointment(formData: FormData) {
       }
     });
 
-    if (appointment.client.email) {
-      const fechaFormateada = format(scheduledDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es });
+    const fechaFormateada = format(scheduledDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es });
+
+    if (notifyEmail && appointment.client.email) {
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; color: #171717; max-w-md; margin: 0 auto; padding: 20px;">
           <h1 style="color: #1e3a8a;">Tecnicentro Los Carros</h1>
@@ -70,8 +73,18 @@ export async function createAppointment(formData: FormData) {
       });
     }
 
+    let whatsappUrl = null;
+    if (notifyWhatsapp && appointment.client.phone) {
+      // Formato básico para el enlace de WhatsApp
+      let phone = appointment.client.phone.replace(/\D/g, '');
+      if (phone.length === 10) phone = `57${phone}`; // Asumimos prefijo +57 Colombia si tiene 10 dígitos (celular normal)
+      
+      const message = `Hola ${appointment.client.firstName}, te confirmamos tu cita en Tecnicentro Los Carros para el vehículo ${appointment.vehicle.plate} el día ${fechaFormateada} a las ${timeStr}. ¡Te esperamos!`;
+      whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    }
+
     revalidatePath("/dashboard/citas");
-    return { success: true };
+    return { success: true, whatsappUrl };
   } catch (error: any) {
     return { error: "Ocurrió un error al agendar la cita." };
   }

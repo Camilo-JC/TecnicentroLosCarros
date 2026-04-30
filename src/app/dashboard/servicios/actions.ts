@@ -3,8 +3,16 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function getServices() {
+export async function getServices(query: string = "") {
   return await prisma.serviceRecord.findMany({
+    where: {
+      vehicle: {
+        OR: [
+          { plate: { contains: query, mode: 'insensitive' } },
+          { client: { documentId: { contains: query, mode: 'insensitive' } } }
+        ]
+      }
+    },
     include: {
       vehicle: {
         include: {

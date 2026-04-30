@@ -3,9 +3,16 @@ import Link from "next/link";
 import { PlusCircle, Wrench, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import ServiceSearch from "./ServiceSearch";
 
-export default async function ServiciosPage() {
-  const services = await getServices();
+export default async function ServiciosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const query = q || "";
+  const services = await getServices(query);
 
   return (
     <div>
@@ -24,6 +31,10 @@ export default async function ServiciosPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b border-gray-100 bg-gray-50">
+          <ServiceSearch initialQuery={query} />
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -62,7 +73,7 @@ export default async function ServiciosPage() {
                       )}
                     </td>
                     <td className="p-4 font-bold text-brand-black">
-                      ${service.totalValue.toLocaleString('es-CO')}
+                      {service.totalValue.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}
                     </td>
                   </tr>
                 ))

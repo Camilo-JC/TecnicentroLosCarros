@@ -15,6 +15,9 @@ export default function AppointmentForm() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
 
+  const [notifyEmail, setNotifyEmail] = useState(true);
+  const [notifyWhatsapp, setNotifyWhatsapp] = useState(false);
+
   const handleSearchVehicle = async () => {
     if (!plateQuery) return;
     const results = await searchVehiclesByPlate(plateQuery);
@@ -31,12 +34,17 @@ export default function AppointmentForm() {
 
     formData.append("vehicleId", selectedVehicle.id);
     formData.append("clientId", selectedVehicle.clientId);
+    formData.append("notifyEmail", notifyEmail ? "true" : "false");
+    formData.append("notifyWhatsapp", notifyWhatsapp ? "true" : "false");
 
     startTransition(async () => {
       const result = await createAppointment(formData);
       if (result.error) {
         setError(result.error);
       } else {
+        if (result.whatsappUrl) {
+          window.open(result.whatsappUrl, "_blank");
+        }
         router.push("/dashboard/citas");
       }
     });
@@ -136,12 +144,40 @@ export default function AppointmentForm() {
             </div>
           </div>
 
-          {/* Advertencia si no hay correo */}
-          {!selectedVehicle.client.email && (
-            <div className="text-sm text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-200">
-              <strong>Nota:</strong> Este cliente no tiene correo electrónico registrado. No se enviará confirmación por correo, pero la cita quedará registrada en el sistema.
+          {/* Opciones de Notificación */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Opciones de Notificación al Cliente</label>
+            <div className="flex flex-col gap-3">
+              <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <input 
+                  type="checkbox" 
+                  checked={notifyEmail} 
+                  onChange={(e) => setNotifyEmail(e.target.checked)}
+                  disabled={!selectedVehicle.client.email}
+                  className="w-5 h-5 text-brand-blue rounded border-gray-300 focus:ring-brand-blue"
+                />
+                <div className="flex-1">
+                  <p className="font-medium text-brand-black">Notificar por Correo Electrónico</p>
+                  {!selectedVehicle.client.email && (
+                    <p className="text-xs text-amber-600">El cliente no tiene correo registrado.</p>
+                  )}
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">
+                <input 
+                  type="checkbox" 
+                  checked={notifyWhatsapp} 
+                  onChange={(e) => setNotifyWhatsapp(e.target.checked)}
+                  className="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                />
+                <div className="flex-1">
+                  <p className="font-medium text-green-800">Enviar Confirmación por WhatsApp</p>
+                  <p className="text-xs text-green-600">Se abrirá WhatsApp Web con un mensaje predefinido para enviar al cliente ({selectedVehicle.client.phone}).</p>
+                </div>
+              </label>
             </div>
-          )}
+          </div>
 
           <div className="flex justify-end pt-4 border-t border-gray-100">
             <button
