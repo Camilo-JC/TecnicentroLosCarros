@@ -2,10 +2,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Car, LogOut, Users, Wrench, CalendarDays } from "lucide-react";
 import LogoutButton from "./LogoutButton";
-import PageTransition from "@/components/PageTransition";
 
 export default async function DashboardLayout({
   children,
@@ -19,21 +17,17 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-brand-blue text-white flex flex-col fixed h-full shadow-xl">
-        <div className="p-4 bg-brand-yellow flex justify-center items-center">
-          <div className="relative w-48 h-16">
-            <Image
-              src="/logo_car_tcl.png"
-              alt="Tecnicentro Los Carros Logo"
-              fill
-              className="object-contain drop-shadow-md"
-              priority
-            />
-          </div>
+      <aside className="w-64 bg-brand-blue text-white flex flex-col fixed h-full">
+        <div className="p-4 bg-brand-yellow text-brand-black">
+          <h1 className="font-black text-xl tracking-tighter uppercase leading-tight">
+            Tecnicentro
+            <br />
+            Los Carros
+          </h1>
         </div>
-        
+
         <div className="p-4 border-b border-blue-800">
           <p className="text-xs text-blue-300 uppercase font-bold tracking-wider mb-1">
             Operador Actual
@@ -66,23 +60,8 @@ export default async function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main
-        className="relative flex-1 ml-64 p-8"
-        style={{
-          backgroundImage: "url('/fondo%20tlc.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        {/* Overlay claro */}
-        <div className="absolute inset-0 bg-white/85" />
-        <div className="relative z-10">
-          <PageTransition>
-            {children}
-          </PageTransition>
-        </div>
+      <main className="flex-1 ml-64 p-8">
+        {children}
       </main>
     </div>
   );
