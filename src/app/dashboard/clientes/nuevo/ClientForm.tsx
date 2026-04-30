@@ -38,11 +38,11 @@ export default function ClientForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombres *</label>
-            <input required name="firstName" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="Juan Carlos" />
+            <input required name="firstName" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="camilo " />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
-            <input required name="lastName" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="Pérez" />
+            <input required name="lastName" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="caballero" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Cédula *</label>
@@ -54,7 +54,7 @@ export default function ClientForm() {
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico (Opcional)</label>
-            <input name="email" type="email" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="juan@ejemplo.com" />
+            <input name="email" type="email" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="camilo@ejemplo.com" />
           </div>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function ClientForm() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Año *</label>
-            <input required name="modelYear" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="2020" />
+            <input required name="modelYear" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="2026" />
           </div>
         </div>
       </div>

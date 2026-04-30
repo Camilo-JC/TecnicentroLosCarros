@@ -25,7 +25,7 @@ export default function AppointmentItem({ appointment, isHistory = false }: { ap
     let phone = appointment.client.phone.replace(/\D/g, '');
     if (phone.length === 10) phone = `57${phone}`;
 
-    const message = `¡Hola! 😊 Esperamos que estés muy bien. Te recordamos que hoy tienes una cita con nosotros a las ${appointment.scheduledTime}.\nPor favor confírmanos si asistirás o si necesitas reprogramar.\n¡Te esperamos! 🚗Tecnicentro Los Carros, la mejor decisión para su carro y usted.`;
+    const message = `¡Hola!  Esperamos que estés muy bien. Te recordamos que hoy tienes una cita con nosotros a las ${appointment.scheduledTime}.\nPor favor confírmanos si asistirás o si necesitas reprogramar.\n¡Te esperamos! \n Tecnicentro Los Carros, la mejor decisión para su carro y usted.`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
