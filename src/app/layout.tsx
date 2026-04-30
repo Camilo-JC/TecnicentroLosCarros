@@ -15,7 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Tecnicentro Los Carros",
+  icons: {
+    icon: '/logo_car_tcl.png',
+  },
   description: "Sistema de Gestión Automotriz",
+
 };
 
 export default function RootLayout({
