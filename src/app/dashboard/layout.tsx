@@ -23,7 +23,7 @@ export default async function DashboardLayout({
       {/* Sidebar */}
       <aside className="w-64 bg-brand-blue text-white flex flex-col fixed h-full shadow-xl">
         <div className="p-4 bg-brand-yellow flex justify-center items-center">
-          <div className="relative w-48 h-16">
+          <div className="relative w-60 h-30">
             <Image
               src="/logo.tlc.png"
               alt="Tecnicentro Los Carros Logo"

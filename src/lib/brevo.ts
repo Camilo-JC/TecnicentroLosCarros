@@ -22,7 +22,7 @@ export async function sendEmail({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sender: { email: "no-reply@tecnicentroloscarros.com", name: "Tecnicentro Los Carros" },
+        sender: { email: "camilojc1725@gmail.com", name: "Tecnicentro Los Carros" },
         to: [to],
         subject,
         htmlContent,
