@@ -53,6 +53,10 @@ prisma/*.sqlite3
 prisma/dev.db
 prisma/dev.db-journal
 
+# Archivos sensibles - NO subir al repositorio
+prisma/seed.js
+prisma/schema.prisma
+
 # Database files
 *.db
 *.sqlite
