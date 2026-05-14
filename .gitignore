@@ -112,5 +112,3 @@ build/
 # Turbo
 .turbo/
 
-#gitignore
-.gitignore  
