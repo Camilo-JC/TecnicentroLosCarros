@@ -2,6 +2,7 @@ import { getClients } from "./actions";
 import ClientSearch from "./ClientSearch";
 import Link from "next/link";
 import { PlusCircle, Car } from "lucide-react";
+import QRButton from "./QRButton";
 
 export default async function ClientesPage({
   searchParams,
@@ -54,13 +55,25 @@ export default async function ClientesPage({
                     <td className="p-4 text-gray-600">
                       <div>{client.phone}</div>
                       <div className="text-sm text-gray-400">{client.email || 'Sin correo'}</div>
+                      {client.address && (
+                        <div className="text-xs text-gray-500 mt-1 italic">Dir: {client.address}</div>
+                      )}
                     </td>
                     <td className="p-4">
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-2">
                         {client.vehicles.map(v => (
-                          <div key={v.id} className="flex items-center gap-2 bg-blue-50 text-brand-blue px-2 py-1 rounded text-sm w-fit font-medium border border-blue-100">
-                            <Car className="w-3 h-3" />
-                            {v.plate} - {v.brand}
+                          <div key={v.id} className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-2 bg-blue-50 text-brand-blue px-2 py-1 rounded text-sm w-fit font-medium border border-blue-100">
+                              <Car className="w-3 h-3" />
+                              {v.plate} - {v.brand} {v.model}
+                            </div>
+                            <QRButton
+                              plate={v.plate}
+                              brand={v.brand}
+                              model={v.model}
+                              token={v.token}
+                              clientName={`${client.firstName} ${client.lastName}`}
+                            />
                           </div>
                         ))}
                       </div>

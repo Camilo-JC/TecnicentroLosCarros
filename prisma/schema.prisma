@@ -1,0 +1,94 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  username  String   @unique
+  password  String
+  role      String   @default("OPERADOR") // "ADMINISTRADOR" o "OPERADOR"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id         String        @id @default(cuid())
+  firstName  String
+  lastName   String
+  documentId String        @unique
+  phone      String
+  email      String?
+  address    String?       // Nuevo: Dirección del Cliente
+  token      String        @unique @default(cuid()) // Nuevo: Token para portal de autogestión
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  vehicles   Vehicle[]
+  appointments Appointment[]
+}
+
+model Vehicle {
+  id           String          @id @default(cuid())
+  plate        String          @unique
+  brand        String
+  model        String          // Nuevo: Modelo del Vehículo
+  modelYear    String          // Año del Vehículo
+  clientId     String
+  client       Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  services     ServiceRecord[]
+  appointments Appointment[]
+  token        String          @unique @default(cuid()) // Nuevo: Token de autogestión por vehículo
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model MaintenanceService {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  description  String?
+  isActive     Boolean       @default(true)
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Appointment {
+  id            String               @id @default(cuid())
+  clientId      String
+  client        Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  vehicleId     String
+  vehicle       Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  scheduledDate DateTime
+  scheduledTime String               // Jornada de atención: "MAÑANA" o "TARDE"
+  status        String               @default("PENDING") // "PENDING", "COMPLETED", "CANCELLED"
+  services      MaintenanceService[] // Servicios seleccionados obligatoriamente
+  token         String               @unique @default(cuid()) // Token para reprogramación/cancelación de la cita
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+model ServiceRecord {
+  id          String     @id @default(cuid())
+  vehicleId   String
+  vehicle     Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  totalValue  Float
+  description String?
+  activities  Activity[]
+  date        DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Activity {
+  id              String        @id @default(cuid())
+  name            String
+  serviceRecordId String
+  serviceRecord   ServiceRecord @relation(fields: [serviceRecordId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}

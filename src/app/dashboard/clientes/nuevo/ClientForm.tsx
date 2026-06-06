@@ -1,17 +1,85 @@
 "use client";
 
-import { useTransition, useState } from "react";
+import { useTransition, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClientWithVehicle } from "../actions";
 import { Save, User, Car } from "lucide-react";
+import { COLOMBIAN_CAR_BRANDS, BRAND_MODELS_MAP, CarBrand } from "@/lib/carCatalogs";
 
 export default function ClientForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  // Auto-complete Brand State
+  const [brandInput, setBrandInput] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState<CarBrand | null>(null);
+  const [brandSuggestions, setBrandSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const brandContainerRef = useRef<HTMLDivElement>(null);
+
+  // Model State
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState("");
+
+  // Filter brand suggestions as the user types
+  useEffect(() => {
+    if (!brandInput) {
+      setBrandSuggestions([]);
+      setSelectedBrand(null);
+      setAvailableModels([]);
+      setSelectedModel("");
+      return;
+    }
+
+    const filtered = COLOMBIAN_CAR_BRANDS.filter(brand =>
+      brand.toLowerCase().includes(brandInput.toLowerCase())
+    );
+    setBrandSuggestions(filtered);
+
+    // If the input matches a valid brand exactly, select it
+    const exactMatch = COLOMBIAN_CAR_BRANDS.find(
+      brand => brand.toLowerCase() === brandInput.toLowerCase()
+    );
+    if (exactMatch) {
+      setSelectedBrand(exactMatch);
+      setAvailableModels(BRAND_MODELS_MAP[exactMatch] || []);
+    } else {
+      setSelectedBrand(null);
+      setAvailableModels([]);
+      setSelectedModel("");
+    }
+  }, [brandInput]);
+
+  // Handle click outside suggestions to close them
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (brandContainerRef.current && !brandContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectBrand = (brand: CarBrand) => {
+    setBrandInput(brand);
+    setSelectedBrand(brand);
+    setAvailableModels(BRAND_MODELS_MAP[brand] || []);
+    setShowSuggestions(false);
+    setSelectedModel("");
+  };
+
   const handleSubmit = async (formData: FormData) => {
     setError(null);
+
+    if (!selectedBrand) {
+      setError("Debes seleccionar una marca válida de la lista comercializada en Colombia.");
+      return;
+    }
+
+    formData.set("brand", selectedBrand);
+
     startTransition(async () => {
       const result = await createClientWithVehicle(formData);
       if (result.error) {
@@ -38,11 +106,11 @@ export default function ClientForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombres *</label>
-            <input required name="firstName" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="camilo " />
+            <input required name="firstName" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="Camilo" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
-            <input required name="lastName" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="caballero" />
+            <input required name="lastName" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="Caballero" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Cédula *</label>
@@ -51,6 +119,10 @@ export default function ClientForm() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
             <input required name="phone" type="tel" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="3001234567" />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
+            <input required name="address" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="Calle 123 # 45-67, Bogotá" />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico (Opcional)</label>
@@ -64,15 +136,65 @@ export default function ClientForm() {
           <Car className="w-5 h-5 text-brand-blue" />
           Datos del Vehículo
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Placa *</label>
             <input required name="plate" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border uppercase" placeholder="ABC-123" />
           </div>
-          <div>
+          
+          {/* Autocompletar Marca */}
+          <div className="relative" ref={brandContainerRef}>
             <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
-            <input required name="brand" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="Chevrolet" />
+            <input
+              required
+              type="text"
+              value={brandInput}
+              onChange={(e) => {
+                setBrandInput(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border"
+              placeholder="Escribe la marca..."
+              autoComplete="off"
+            />
+            {showSuggestions && brandSuggestions.length > 0 && (
+              <ul className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto divide-y divide-gray-50">
+                {brandSuggestions.map((brand) => (
+                  <li key={brand}>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectBrand(brand as CarBrand)}
+                      className="w-full text-left p-2.5 text-sm text-gray-800 hover:bg-slate-50 hover:text-brand-blue transition-colors font-medium"
+                    >
+                      {brand}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+
+          {/* Carga Dinámica de Modelos */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
+            <select
+              required
+              name="model"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              disabled={!selectedBrand}
+              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border disabled:opacity-50 text-gray-900"
+            >
+              <option value="">Selecciona un modelo</option>
+              {availableModels.map((model) => (
+                <option key={model} value={model}>
+                  {model}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Año *</label>
             <input required name="modelYear" type="text" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" placeholder="2026" />

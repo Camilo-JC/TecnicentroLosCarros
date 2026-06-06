@@ -52,7 +52,7 @@ export default async function DashboardPage() {
             {todaysAppointments.map(appt => (
               <div key={appt.id} className="bg-white p-3 rounded-lg border border-blue-100 flex justify-between items-center">
                 <div>
-                  <span className="font-bold text-brand-black">{appt.scheduledTime}</span> - <span className="font-medium text-brand-blue">{appt.vehicle.plate}</span> {appt.vehicle.brand}
+                  <span className="font-bold text-brand-black">{appt.scheduledTime === "MAÑANA" ? "Mañana" : "Tarde"}</span> - <span className="font-medium text-brand-blue">{appt.vehicle.plate}</span> {appt.vehicle.brand} {appt.vehicle.model || ""}
                   <p className="text-sm text-gray-600">{appt.client.firstName} {appt.client.lastName}</p>
                 </div>
                 <Link href="/dashboard/citas" className="text-sm text-brand-blue hover:underline font-medium">Ver detalles</Link>

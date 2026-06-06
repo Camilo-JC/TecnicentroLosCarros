@@ -6,7 +6,15 @@ import { createAppointment } from "../actions";
 import { searchVehiclesByPlate } from "../../servicios/actions";
 import { Save, Search, Car, CalendarDays, Clock } from "lucide-react";
 
-export default function AppointmentForm() {
+interface AppointmentFormProps {
+  services: {
+    id: string;
+    name: string;
+    description: string | null;
+  }[];
+}
+
+export default function AppointmentForm({ services }: AppointmentFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +25,8 @@ export default function AppointmentForm() {
 
   const [notifyEmail, setNotifyEmail] = useState(true);
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(false);
+
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   // Get today's date in YYYY-MM-DD format
   const todayDate = new Date().toISOString().split('T')[0];
@@ -38,6 +48,14 @@ export default function AppointmentForm() {
     return () => clearTimeout(timer);
   }, [plateQuery]);
 
+  const handleServiceChange = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedServices(prev => [...prev, id]);
+    } else {
+      setSelectedServices(prev => prev.filter(sId => sId !== id));
+    }
+  };
+
   const handleSubmit = async (formData: FormData) => {
     setError(null);
     if (!selectedVehicle) {
@@ -45,10 +63,20 @@ export default function AppointmentForm() {
       return;
     }
 
+    if (selectedServices.length === 0) {
+      setError("Debes seleccionar al menos un servicio de mantenimiento.");
+      return;
+    }
+
     formData.append("vehicleId", selectedVehicle.id);
     formData.append("clientId", selectedVehicle.clientId);
     formData.append("notifyEmail", notifyEmail ? "true" : "false");
     formData.append("notifyWhatsapp", notifyWhatsapp ? "true" : "false");
+
+    // Enviar múltiples valores para 'services'
+    selectedServices.forEach(id => {
+      formData.append("services", id);
+    });
 
     startTransition(async () => {
       const result = await createAppointment(formData);
@@ -93,7 +121,7 @@ export default function AppointmentForm() {
                   className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-brand-blue hover:shadow-sm transition-all text-left"
                 >
                   <div>
-                    <div className="font-bold text-brand-black">{v.plate} - {v.brand} {v.modelYear}</div>
+                    <div className="font-bold text-brand-black">{v.plate} - {v.brand} {v.model || ''} {v.modelYear}</div>
                     <div className="text-sm text-gray-500">Propietario: {v.client.firstName} {v.client.lastName}</div>
                   </div>
                   <div className="text-brand-blue text-sm font-medium">Seleccionar</div>
@@ -120,7 +148,7 @@ export default function AppointmentForm() {
               </div>
               <div>
                 <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Vehículo Seleccionado</p>
-                <p className="font-bold text-brand-black text-lg">{selectedVehicle.plate} - {selectedVehicle.brand}</p>
+                <p className="font-bold text-brand-black text-lg">{selectedVehicle.plate} - {selectedVehicle.brand} {selectedVehicle.model || ''}</p>
                 <p className="text-sm text-gray-600">{selectedVehicle.client.firstName} {selectedVehicle.client.lastName} {selectedVehicle.client.email ? `(${selectedVehicle.client.email})` : ''}</p>
               </div>
             </div>
@@ -133,25 +161,61 @@ export default function AppointmentForm() {
             </button>
           </div>
 
-          {/* Fecha y Hora */}
+          {/* Fecha y Jornada */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-brand-blue" /> Fecha
+                <CalendarDays className="w-4 h-4 text-brand-blue" /> Fecha de Atención *
               </label>
-              <input required name="scheduledDate" type="date" min={todayDate} className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" />
+              <input required name="scheduledDate" type="date" min={todayDate} className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border text-gray-900" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-brand-blue" /> Hora (8:00 AM - 5:00 PM)
+                <Clock className="w-4 h-4 text-brand-blue" /> Jornada de Atención *
               </label>
-              <input required name="scheduledTime" type="time" min="08:00" max="17:00" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border" />
+              <select
+                required
+                name="scheduledTime"
+                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-blue focus:ring-brand-blue bg-gray-50 p-2.5 outline-none border text-gray-900"
+              >
+                <option value="">Selecciona una jornada</option>
+                <option value="MAÑANA">Mañana (8:00 AM - 12:00 PM)</option>
+                <option value="TARDE">Tarde (12:00 PM - 5:00 PM)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Servicios de Mantenimiento Checkboxes */}
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              Servicios de Mantenimiento Requeridos * (Selecciona al menos uno)
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {services.map(service => (
+                <label
+                  key={service.id}
+                  className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-brand-blue/50 transition-all"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedServices.includes(service.id)}
+                    onChange={(e) => handleServiceChange(service.id, e.target.checked)}
+                    className="w-5 h-5 text-brand-blue rounded border-gray-300 focus:ring-brand-blue mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <p className="font-bold text-brand-black text-sm">{service.name}</p>
+                    {service.description && (
+                      <p className="text-xs text-gray-500 mt-0.5">{service.description}</p>
+                    )}
+                  </div>
+                </label>
+              ))}
             </div>
           </div>
 
           {/* Opciones de Notificación */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Opciones de Notificación al Cliente</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 font-bold">Opciones de Notificación al Cliente</label>
             <div className="flex flex-col gap-3">
               <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                 <input 
@@ -178,7 +242,7 @@ export default function AppointmentForm() {
                 />
                 <div className="flex-1">
                   <p className="font-medium text-green-800">Enviar Confirmación por WhatsApp</p>
-                  <p className="text-xs text-green-600">Se abrirá WhatsApp Web con un mensaje predefinido para enviar al cliente ({selectedVehicle.client.phone}).</p>
+                  <p className="text-xs text-green-600">Genera un mensaje personalizado para enviar al cliente ({selectedVehicle.client.phone}).</p>
                 </div>
               </label>
             </div>

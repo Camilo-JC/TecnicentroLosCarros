@@ -56,7 +56,7 @@ export default async function ServiciosPage({
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium text-brand-black">{service.vehicle.plate} - {service.vehicle.brand}</div>
+                      <div className="font-medium text-brand-black">{service.vehicle.plate} - {service.vehicle.brand} {service.vehicle.model || ""}</div>
                       <div className="text-sm text-gray-500">{service.vehicle.client.firstName} {service.vehicle.client.lastName}</div>
                     </td>
                     <td className="p-4">

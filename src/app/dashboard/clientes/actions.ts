@@ -24,9 +24,11 @@ export async function createClientWithVehicle(formData: FormData) {
   const documentId = formData.get("documentId") as string;
   const phone = formData.get("phone") as string;
   const email = formData.get("email") as string;
+  const address = formData.get("address") as string;
   
   const plate = formData.get("plate") as string;
   const brand = formData.get("brand") as string;
+  const model = formData.get("model") as string;
   const modelYear = formData.get("modelYear") as string;
 
   try {
@@ -37,10 +39,12 @@ export async function createClientWithVehicle(formData: FormData) {
         documentId,
         phone,
         email: email || null,
+        address: address || null,
         vehicles: {
           create: {
             plate: plate.toUpperCase(),
             brand,
+            model,
             modelYear
           }
         }

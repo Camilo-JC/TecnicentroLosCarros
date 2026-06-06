@@ -1,8 +1,14 @@
 import AppointmentForm from "./AppointmentForm";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-export default function NuevaCitaPage() {
+export default async function NuevaCitaPage() {
+  const services = await prisma.maintenanceService.findMany({
+    where: { isActive: true },
+    orderBy: { name: 'asc' }
+  });
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6 flex items-center gap-4">
@@ -19,7 +25,7 @@ export default function NuevaCitaPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <AppointmentForm />
+        <AppointmentForm services={services} />
       </div>
     </div>
   );

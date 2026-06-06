@@ -55,7 +55,6 @@ prisma/dev.db-journal
 
 # Archivos sensibles - NO subir al repositorio
 prisma/seed.js
-prisma/schema.prisma
 
 # Database files
 *.db
